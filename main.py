@@ -32,6 +32,9 @@ async def generate_quote(audio_file: UploadFile = File(...)):
             initial_prompt="This is a construction and contractor quote. Vocabulary: oak flooring, labor, square feet, hours, carpet removal."
         )
 
+        transcript = transcription_result["text"]
+        print(f"Transcript: {transcript}")
+
         # Pass the transcribed text to Llama 3.2
         extracted_data = extract_quote(transcript)
         payload = extracted_data.model_dump()
