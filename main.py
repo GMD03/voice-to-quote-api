@@ -11,7 +11,7 @@ app = FastAPI(title="Voice to Quote API")
 N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/receive-quote"
 
 print("Loading Whisper Model...")
-whisper_model = whisper.load_model("base")
+whisper_model = whisper.load_model("small")
 print("Whisper Model Loaded!")
 
 # class QuoteRequest(BaseModel):
@@ -27,9 +27,10 @@ async def generate_quote(audio_file: UploadFile = File(...)):
             shutil.copyfileobj(audio_file.file, buffer)
 
         print("Transcribing audio...")
-        transcription_result = whisper_model.transcribe(temp_file_path)
-        transcript = transcription_result["text"]
-        print(f"Transcript: {transcript}")
+        transcription_result = whisper_model.transcribe(
+            temp_file_path,
+            initial_prompt="This is a construction and contractor quote. Vocabulary: oak flooring, labor, square feet, hours, carpet removal."
+        )
 
         # Pass the transcribed text to Llama 3.2
         extracted_data = extract_quote(transcript)
