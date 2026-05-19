@@ -10,7 +10,7 @@ app = FastAPI(title="Voice to Quote API")
 
 N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/receive-quote"
 
-print("Loading Whisper Model... (This might take a minute the first time)")
+print("Loading Whisper Model...")
 whisper_model = whisper.load_model("base")
 print("Whisper Model Loaded!")
 
