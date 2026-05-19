@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import BaseModel
 import requests
 import whisper
@@ -17,6 +17,7 @@ print("Whisper Model Loaded!")
 # class QuoteRequest(BaseModel):
     # transcript: str
 
+@app.post("/generate-quote")
 async def generate_quote(audio_file: UploadFile = File(...)):
     print(f"Received audio file: {audio_file.filename}")
     temp_file_path = f"temp_{audio_file.filename}"
