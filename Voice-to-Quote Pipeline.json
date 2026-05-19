@@ -1,0 +1,34 @@
+{
+  "name": "Voice-to-Quote Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receive-quote",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9d6d147b-14f6-422b-83a4-d7f8a9571c10",
+      "name": "Webhook",
+      "webhookId": "beea0f2f-f7ed-4671-ae2b-14f26366ac96"
+    }
+  ],
+  "pinData": {},
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0854e929-9308-4b7e-91ab-16e4ec7feab6",
+  "meta": {
+    "instanceId": "5bfb201e0a2162c3851bd3d50f93b1992428c98d4723e36d6b7986046d0c42d4"
+  },
+  "id": "wk030W8NL8xz2vzi",
+  "tags": []
+}
