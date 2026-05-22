@@ -21,10 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let seconds = 0;
 
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let animationId;
+
     const recordBtn = document.getElementById('record-btn');
     const recordStatus = document.getElementById('record-status');
     const recordingIndicator = document.getElementById('recording-indicator');
     const timerDisplay = document.querySelector('.timer');
+    const eqOrb = document.getElementById('eq-orb');
     
     const fileUpload = document.getElementById('file-upload');
     const dropZone = document.getElementById('drop-zone');
@@ -56,6 +62,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaRecorder.start();
                 isRecording = true;
                 
+                // Set up Web Audio API for Equalizer Orb
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                eqOrb.classList.add('active');
+                
+                function drawEqualizer() {
+                    if (!isRecording) return;
+                    animationId = requestAnimationFrame(drawEqualizer);
+                    analyser.getByteFrequencyData(dataArray);
+                    
+                    let sum = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        sum += dataArray[i];
+                    }
+                    let average = sum / bufferLength;
+                    
+                    // Map average (0-255) to scale (1 - 2.5)
+                    let scale = 1 + (average / 255) * 1.5;
+                    let dynamicOpacity = 0.3 + (average / 255) * 0.5;
+                    
+                    eqOrb.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                    eqOrb.style.opacity = dynamicOpacity;
+                }
+                
+                drawEqualizer();
+                
                 // UI Updates
                 recordBtn.classList.add('recording');
                 recordBtn.innerHTML = '<i class="ph ph-stop"></i>';
@@ -83,6 +122,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             mediaRecorder.stop();
             isRecording = false;
+            
+            // Stop Equalizer Animation
+            cancelAnimationFrame(animationId);
+            eqOrb.classList.remove('active');
+            eqOrb.style.transform = '';
+            eqOrb.style.opacity = '';
+            if (audioContext) {
+                audioContext.close();
+            }
             
             // UI Updates
             recordBtn.classList.remove('recording');

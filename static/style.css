@@ -77,6 +77,33 @@ body {
     100% { transform: translate(30px, 30px) scale(1.1); }
 }
 
+.equalizer-orb {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--clr-accent-light) 0%, var(--clr-teal) 40%, transparent 70%);
+    filter: blur(30px);
+    opacity: 0.3;
+    transition: transform 0.05s ease-out, opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+    animation: idlePulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes idlePulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+    100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.4; }
+}
+
+.equalizer-orb.active {
+    opacity: 0.7;
+    animation: none; /* Disable idle animation when recording to let JS take over */
+}
+
 /* Layout */
 .container {
     max-width: 800px;
@@ -198,6 +225,15 @@ header p {
     padding: 2rem 0;
 }
 
+.button-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 150px;
+}
+
 .circle-btn {
     width: 100px;
     height: 100px;
@@ -212,6 +248,7 @@ header p {
     justify-content: center;
     transition: var(--transition-smooth);
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 1;
 }
 
 .circle-btn:hover {

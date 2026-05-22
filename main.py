@@ -50,17 +50,21 @@ async def generate_quote(audio_file: UploadFile = File(...)):
         payload = extracted_data.model_dump()
         
         print("Sending data to n8n...")
-        n8n_response = requests.post(N8N_WEBHOOK_URL, json=payload)
+        try:
+            n8n_response = requests.post(N8N_WEBHOOK_URL, json=payload)
+            if n8n_response.status_code == 200:
+                print("Successfully sent to n8n")
+            else:
+                print(f"n8n returned status: {n8n_response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Warning: Could not reach n8n webhook. Is n8n running? Error: {e}")
 
-        if n8n_response.status_code == 200:
-            return {
-                "status": "success", 
-                "transcript": transcript, # Returning the transcript so the user can see it
-                "extracted_data": payload
-            }
-        else:
-            raise HTTPException(status_code=n8n_response.status_code, detail="Failed to reach n8n")
-            
+        # Always return the data to the UI, even if n8n is down
+        return {
+            "status": "success", 
+            "transcript": transcript, 
+            "extracted_data": payload
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
