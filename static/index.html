@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice to Quote API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <main class="container">
+        <header>
+            <div class="logo-container">
+                <i class="ph ph-microphone-stage logo-icon"></i>
+            </div>
+            <h1>Voice to <span class="accent-text">Quote</span></h1>
+            <p>Generate professional construction quotes instantly from your voice.</p>
+        </header>
+
+        <div class="interaction-card">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="record"><i class="ph ph-microphone"></i> Record</button>
+                <button class="tab-btn" data-tab="upload"><i class="ph ph-upload-simple"></i> Upload</button>
+            </div>
+
+            <div class="tab-content active" id="record-tab">
+                <div class="record-container">
+                    <button id="record-btn" class="action-btn circle-btn">
+                        <i class="ph ph-microphone"></i>
+                    </button>
+                    <p id="record-status">Click to start recording</p>
+                    <div id="recording-indicator" class="hidden">
+                        <span class="pulse"></span>
+                        <span class="timer">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="upload-tab">
+                <div class="upload-container" id="drop-zone">
+                    <i class="ph ph-file-audio upload-icon"></i>
+                    <p>Drag & drop your audio file here or</p>
+                    <input type="file" id="file-upload" accept="audio/*" hidden>
+                    <label for="file-upload" class="action-btn secondary-btn">Browse Files</label>
+                    <p id="file-name" class="file-name-display"></p>
+                </div>
+            </div>
+
+            <div class="actions-container">
+                <button id="submit-btn" class="action-btn primary-btn submit-btn" disabled>
+                    <span>Generate Quote</span>
+                    <i class="ph ph-magic-wand"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing audio & extracting quote data...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="results-container hidden">
+            <h2>Quote <span class="accent-text">Details</span></h2>
+
+            <div class="result-card customer-card">
+                <h3><i class="ph ph-user"></i> Customer Details</h3>
+                <p id="customer-details">...</p>
+            </div>
+
+            <div class="result-card items-card">
+                <h3><i class="ph ph-list-dashes"></i> Line Items</h3>
+                <div class="table-responsive">
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="result-card transcript-card">
+                <h3><i class="ph ph-quotes"></i> Original Transcript</h3>
+                <p id="transcript-text">...</p>
+            </div>
+
+            <button id="reset-btn" class="action-btn secondary-btn reset-btn">
+                <i class="ph ph-arrow-counter-clockwise"></i> New Quote
+            </button>
+        </div>
+
+    </main>
+
+    <script src="/app.js"></script>
+</body>
+
+</html>

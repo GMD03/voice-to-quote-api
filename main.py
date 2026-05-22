@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import whisper
@@ -7,6 +9,14 @@ import shutil
 from extractor import extract_quote
 
 app = FastAPI(title="Voice to Quote API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/receive-quote"
 
@@ -58,3 +68,6 @@ async def generate_quote(audio_file: UploadFile = File(...)):
         # Delete temp audio file 
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+# Mount the static directory to serve the frontend UI
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
