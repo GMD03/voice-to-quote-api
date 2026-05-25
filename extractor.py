@@ -1,6 +1,7 @@
 from ollama import chat
 from pydantic import BaseModel
 from typing import List
+from typing import Literal
 
 class LineItem(BaseModel):
     item_name: str
@@ -44,4 +45,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Extraction Failed: {e}")
     
-    
+class ParsedQuote(BaseModel):
+    items: List[LineItem]
+    customer_details: str
+    # NEW: We force Llama to categorize the user's intent
+    action_type: Literal["draft", "generate"]    
