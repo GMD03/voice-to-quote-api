@@ -6,7 +6,7 @@ import requests
 import whisper
 import os
 import shutil
-from extractor import extract_quote
+from extractor import extract_quote_data
 
 app = FastAPI(title="Voice to Quote API")
 
@@ -46,7 +46,7 @@ async def generate_quote(audio_file: UploadFile = File(...)):
         print(f"Transcript: {transcript}")
 
         # Pass the transcribed text to Llama 3.2
-        extracted_data = extract_quote(transcript)
+        extracted_data = extract_quote_data(transcript)
         payload = extracted_data.model_dump()
         
         print("Sending data to n8n...")

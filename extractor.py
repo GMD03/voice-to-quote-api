@@ -1,7 +1,6 @@
 from ollama import chat
 from pydantic import BaseModel
-from typing import List
-from typing import Literal
+from typing import List, Literal
 
 class LineItem(BaseModel):
     item_name: str
@@ -11,42 +10,29 @@ class LineItem(BaseModel):
 class ParsedQuote(BaseModel):
     items: List[LineItem]
     customer_details: str
+    action_type: Literal["draft", "generate"] 
 
-
-def extract_quote(transcript: str) -> ParsedQuote:
+def extract_quote_data(transcript: str) -> ParsedQuote:
     print(f"Analyzing transcript: '{transcript}'...\n")
-
-    #Pass the Pydantic schema directly into Ollama's format parameter
+    
     response = chat(
-        model = 'llama3.2',
-        messages = [
-            {
-                'role': 'system',
-                'content': 'You are a precise data extraction tool for construction quotes. Extract the materials and labor. If a unit is not explicitly stated, infer the most logical unit (e.g., hours for labor, sq_ft for flooring). Format item names with underscores (e.g., oak_flooring).'
-            },
-            {
-                'role': 'user',
-                'content': transcript 
-            }
-        ],
+        model='llama3.2',
+        messages=[{
+            'role': 'system',
+            'content': '''You are a precise data extraction tool for construction quotes. 
+            Extract materials and labor. If a unit is not explicitly stated, infer the most logical unit.
+            Format item names with underscores (e.g., oak_flooring).
+            
+            CRITICAL INSTRUCTION FOR ACTION_TYPE:
+            - If the user is just listing materials or logging hours, set action_type to "draft".
+            - If the user explicitly says to "generate", "finalize", "create", or "send" the quote/report, set action_type to "generate".'''
+        },
+        {
+            'role': 'user',
+            'content': transcript
+        }],
         format=ParsedQuote.model_json_schema(),
-        options={'temperature': 0}
+        options={'temperature': 0} 
     )
-
+    
     return ParsedQuote.model_validate_json(response.message.content)
-
-if __name__ == "__main__":
-    test_transcript = "Just walked the Smith property. Needs 40 square feet of oak flooring and 10 hours of labor. Also, the client requested we avoid making noise before 9 AM."
-    
-    try:
-        result = extract_quote(test_transcript)
-        print(f"Extraction Successful!\n")
-        print(result.model_dump_json(indent=2))
-    except Exception as e:
-        print(f"Extraction Failed: {e}")
-    
-class ParsedQuote(BaseModel):
-    items: List[LineItem]
-    customer_details: str
-    # NEW: We force Llama to categorize the user's intent
-    action_type: Literal["draft", "generate"]    
