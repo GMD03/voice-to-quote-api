@@ -242,6 +242,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('customer-details').textContent = 
                 data.extracted_data.customer_details || 'No customer details extracted.';
 
+            // Populate Quote Status
+            const quoteStatusEl = document.getElementById('quote-status');
+            if (quoteStatusEl) {
+                const actionType = data.extracted_data.action_type;
+                if (actionType === 'generate') {
+                    quoteStatusEl.innerHTML = '<strong>Final Quote Generated</strong>';
+                    quoteStatusEl.style.color = '#10b981'; // green
+                } else {
+                    quoteStatusEl.innerHTML = '<strong>Draft</strong>';
+                    quoteStatusEl.style.color = '#f59e0b'; // orange
+                }
+            }
+
             // Populate Items
             const tbody = document.getElementById('items-body');
             tbody.innerHTML = '';
@@ -262,7 +275,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbody.appendChild(tr);
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No items extracted.</td></tr>';
+                if (data.extracted_data.action_type === 'generate') {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 2rem; color: #10b981;"><strong>Final Quote Generated!</strong><br><small style="color: var(--text-secondary);">Your quote has been finalized.</small></td></tr>';
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No items extracted.</td></tr>';
+                }
             }
         }
     }
