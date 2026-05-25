@@ -25,7 +25,10 @@ def extract_quote_data(transcript: str) -> ParsedQuote:
             
             CRITICAL INSTRUCTION FOR ACTION_TYPE:
             - If the user is just listing materials or logging hours, set action_type to "draft".
-            - If the user explicitly says to "generate", "finalize", "create", or "send" the quote/report, set action_type to "generate".'''
+            - If the user explicitly says to "generate", "finalize", "create", or "send" the quote/report, set action_type to "generate".
+            
+            CRITICAL INSTRUCTION FOR ITEMS:
+            - If action_type is "generate", you MUST return an empty list [] for items. DO NOT invent, guess, or hallucinate materials.'''
         },
         {
             'role': 'user',
