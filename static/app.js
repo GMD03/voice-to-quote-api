@@ -24,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioContext;
     let analyser;
     let dataArray;
-    let animationId;
 
     const recordBtn = document.getElementById('record-btn');
     const recordStatus = document.getElementById('record-status');
     const recordingIndicator = document.getElementById('recording-indicator');
     const timerDisplay = document.querySelector('.timer');
-    const eqOrb = document.getElementById('eq-orb');
+    
+    const canvas = document.getElementById('eq-canvas');
+    const ctx = canvas.getContext('2d');
     
     const fileUpload = document.getElementById('file-upload');
     const dropZone = document.getElementById('drop-zone');
@@ -62,8 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaRecorder.start();
                 isRecording = true;
                 
-                // Set up Web Audio API for Equalizer Orb
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Set up Web Audio API for Equalizer
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } else if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
                 const source = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 256;
@@ -71,29 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const bufferLength = analyser.frequencyBinCount;
                 dataArray = new Uint8Array(bufferLength);
-                
-                eqOrb.classList.add('active');
-                
-                function drawEqualizer() {
-                    if (!isRecording) return;
-                    animationId = requestAnimationFrame(drawEqualizer);
-                    analyser.getByteFrequencyData(dataArray);
-                    
-                    let sum = 0;
-                    for (let i = 0; i < bufferLength; i++) {
-                        sum += dataArray[i];
-                    }
-                    let average = sum / bufferLength;
-                    
-                    // Map average (0-255) to scale (1 - 2.5)
-                    let scale = 1 + (average / 255) * 1.5;
-                    let dynamicOpacity = 0.3 + (average / 255) * 0.5;
-                    
-                    eqOrb.style.transform = `translate(-50%, -50%) scale(${scale})`;
-                    eqOrb.style.opacity = dynamicOpacity;
-                }
-                
-                drawEqualizer();
                 
                 // UI Updates
                 recordBtn.classList.add('recording');
@@ -122,15 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             mediaRecorder.stop();
             isRecording = false;
-            
-            // Stop Equalizer Animation
-            cancelAnimationFrame(animationId);
-            eqOrb.classList.remove('active');
-            eqOrb.style.transform = '';
-            eqOrb.style.opacity = '';
-            if (audioContext) {
-                audioContext.close();
-            }
             
             // UI Updates
             recordBtn.classList.remove('recording');
@@ -296,4 +270,114 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
         recordStatus.textContent = 'Click to start recording';
     });
+
+    // Blob Equalizer Drawing Loop
+    let idleAngle = 0;
+    const numRings = 14;
+    const numPoints = 24; // Lower number of points for smoother, larger curves
+    let history = [];
+    
+    // Initialize history
+    for (let i = 0; i < numRings; i++) {
+        history.push(new Array(numPoints).fill(0));
+    }
+    
+    function drawVisualizer() {
+        requestAnimationFrame(drawVisualizer);
+        if (!ctx) return;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const baseInnerRadius = 25;
+        const ringSpacing = 7;
+        
+        let currentFrame = new Array(numPoints).fill(0);
+        
+        if (isRecording && analyser && dataArray) {
+            analyser.getByteFrequencyData(dataArray);
+            const halfPoints = numPoints / 2;
+            for (let i = 0; i < numPoints; i++) {
+                let dataIndex = i;
+                if (i >= halfPoints) {
+                    dataIndex = numPoints - 1 - i; // mirror for symmetry
+                }
+                
+                // Map to the first ~24 bins (bass & vocal ranges)
+                let actualIndex = Math.floor((dataIndex / halfPoints) * 24);
+                currentFrame[i] = dataArray[actualIndex];
+            }
+        } else {
+            // Idle organic blob animation
+            for (let i = 0; i < numPoints; i++) {
+                const angle = i * (Math.PI * 2) / numPoints;
+                const wave = Math.sin(angle * 2 + idleAngle) * 12 + 
+                             Math.cos(angle * 3 - idleAngle * 0.8) * 8;
+                currentFrame[i] = 30 + wave;
+            }
+        }
+        
+        idleAngle += 0.02;
+        
+        // Push new data and remove oldest
+        history.unshift(currentFrame);
+        history.pop();
+        
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
+        
+        // Draw from outside-in (oldest history first)
+        for (let r = numRings - 1; r >= 0; r--) {
+            const frameData = history[r];
+            const baseRadius = baseInnerRadius + (r * ringSpacing);
+            
+            let color;
+            if (r < numRings * 0.3) {
+                color = '#ced7e0'; // inner brightest
+            } else if (r < numRings * 0.7) {
+                color = '#9ccddc'; // mid
+            } else {
+                color = '#5591a9'; // outer dark teal
+            }
+            
+            ctx.strokeStyle = color;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = color;
+            
+            // Calculate points for this ring
+            const points = [];
+            for (let i = 0; i < numPoints; i++) {
+                const value = frameData[i];
+                // Smooth perturbation that scales down for outer rings
+                const perturbation = (value / 255) * 45 * (1 - r/(numRings * 1.5));
+                const radius = baseRadius + Math.max(0, perturbation);
+                
+                const angle = i * (Math.PI * 2) / numPoints - Math.PI / 2;
+                points.push({
+                    x: cx + Math.cos(angle) * radius,
+                    y: cy + Math.sin(angle) * radius
+                });
+            }
+            
+            // Draw smooth closed shape using quadratic curves
+            ctx.beginPath();
+            const startX = (points[0].x + points[numPoints-1].x) / 2;
+            const startY = (points[0].y + points[numPoints-1].y) / 2;
+            ctx.moveTo(startX, startY);
+            
+            for (let i = 0; i < numPoints; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % numPoints];
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+                ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
+            }
+            
+            ctx.closePath();
+            ctx.stroke();
+        }
+    }
+    
+    drawVisualizer();
 });
