@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (err) {
                 console.error("Error accessing microphone:", err);
-                alert("Could not access the microphone. Please check permissions.");
+                alert(`Could not access the microphone.\nReason: ${err.name} - ${err.message}\n\nPlease ensure a microphone is plugged in and permissions are granted.`);
             }
         } else {
             mediaRecorder.stop();
