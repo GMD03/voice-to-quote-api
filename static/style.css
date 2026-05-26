@@ -217,21 +217,30 @@ header p {
 }
 
 /* Record UI */
-.record-container {
+.record-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    padding: 2rem 0;
+}
+
+.record-left {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
-    padding: 2rem 0;
+    flex: 1;
 }
 
-.button-wrapper {
-    position: relative;
+.record-right {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 150px;
-    height: 150px;
+    flex: 1;
+    position: relative;
+    height: 200px;
 }
 
 .circle-btn {
@@ -486,4 +495,5 @@ td {
     h1 { font-size: 2.2rem; }
     .container { margin: 2rem auto; }
     .interaction-card { padding: 1.5rem; }
+    .record-layout { flex-direction: column; gap: 2rem; }
 }

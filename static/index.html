@@ -36,17 +36,19 @@
             </div>
 
             <div class="tab-content active" id="record-tab">
-                <div class="record-container">
-                    <div class="button-wrapper">
-                        <div class="equalizer-orb" id="eq-orb"></div>
+                <div class="record-layout">
+                    <div class="record-left">
                         <button id="record-btn" class="action-btn circle-btn">
                             <i class="ph ph-microphone"></i>
                         </button>
+                        <p id="record-status">Click to start recording</p>
+                        <div id="recording-indicator" class="hidden">
+                            <span class="pulse"></span>
+                            <span class="timer">00:00</span>
+                        </div>
                     </div>
-                    <p id="record-status">Click to start recording</p>
-                    <div id="recording-indicator" class="hidden">
-                        <span class="pulse"></span>
-                        <span class="timer">00:00</span>
+                    <div class="record-right">
+                        <div class="equalizer-orb" id="eq-orb"></div>
                     </div>
                 </div>
             </div>
