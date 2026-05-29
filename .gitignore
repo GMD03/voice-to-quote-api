@@ -24,3 +24,11 @@ build/
 # OS files
 Thumbs.db
 .DS_Store
+
+# Audio and Test Files
+test_audio/
+*.mp3
+*.wav
+*.ogg
+*.flac
+*.m4a
